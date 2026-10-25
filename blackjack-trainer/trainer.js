@@ -42,12 +42,17 @@ const CHART = [
 ];
 
 const ROWS = {};
+const CATEGORY_ACTIONS = {}; // category -> actions its chart can resolve to, in ACTION_NAMES order
+const CODE_ACTIONS = { S: 'S', H: 'H', Dh: 'DH', Ds: 'DS', SP: 'P', Uh: 'RH', Us: 'RS', Usp: 'RP' };
 for (const sec of CHART) {
+  const acts = new Set();
   for (const row of sec.rows) {
     row.codes = row.codes.split(' ');
     row.category = sec.category;
     ROWS[row.key] = row;
+    for (const code of row.codes) for (const a of CODE_ACTIONS[code]) acts.add(a);
   }
+  CATEGORY_ACTIONS[sec.category] = 'HSDPR'.split('').filter(a => acts.has(a));
 }
 
 const ACTION_NAMES = { H: 'Hit', S: 'Stand', D: 'Double', P: 'Split', R: 'Surrender' };
@@ -150,10 +155,14 @@ function describeHand(cards) {
 // Stats (persisted)
 // ---------------------------------------------------------------------------
 const STORE_KEY = 'bjtrainer.v1';
+function freshActs() {
+  return { H: { n: 0, c: 0 }, S: { n: 0, c: 0 }, D: { n: 0, c: 0 }, P: { n: 0, c: 0 }, R: { n: 0, c: 0 } };
+}
+function freshCat() { return { n: 0, c: 0, acts: freshActs() }; }
 function freshStats() {
   return {
     decisions: 0, correct: 0, streak: 0, best: 0, hands: 0, won: 0,
-    cats: { hard: { n: 0, c: 0 }, soft: { n: 0, c: 0 }, pair: { n: 0, c: 0 } },
+    cats: { hard: freshCat(), soft: freshCat(), pair: freshCat() }, // each with per-action `acts`
     cells: {},     // "rowKey:col" -> { n, miss }
     mistakes: [],  // newest first
   };
@@ -164,6 +173,8 @@ function loadStats() {
     if (s && s.cats) {
       if (typeof s.won !== 'number') s.won = 0; // older saves tracked units in `net`
       delete s.net;
+      delete s.acts; // briefly tracked overall per-action stats; now per category only
+      for (const k in s.cats) if (!s.cats[k].acts) s.cats[k].acts = freshActs();
       return s;
     }
   } catch (e) { /* ignore */ }
@@ -209,7 +220,15 @@ function addChip(amount) {
 // ---------------------------------------------------------------------------
 // Game state
 // ---------------------------------------------------------------------------
-const opts = { surrender: true, h17: true, animate: true };
+const OPTS_KEY = 'bjtrainer.opts.v1';
+const opts = { surrender: true, h17: true, animate: true, showTotals: true };
+try {
+  const o = JSON.parse(localStorage.getItem(OPTS_KEY));
+  if (o) for (const k in opts) if (typeof o[k] === 'boolean') opts[k] = o[k];
+} catch (e) { /* ignore */ }
+function saveOpts() {
+  try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch (e) { /* ignore */ }
+}
 const state = {
   shoe: newShoe(),
   dealer: [],
@@ -220,6 +239,7 @@ const state = {
   lastCell: null,
   correction: null, // details of the most recent wrong decision, cleared by the next correct one
   outcome: null,    // 'won' | 'lost' | 'push' | null (round in progress)
+  peeked: false,    // strategy chart was open during this round: its decisions don't count
 };
 
 function draw() {
@@ -269,6 +289,7 @@ function deal() {
   saveBank();
   state.correction = null;
   state.outcome = null;
+  state.peeked = $('chart-panel').open;
   state.hands = [{ cards: [draw()], bet: wallet.bet, done: false, fromSplit: false, result: null }];
   state.dealer = [draw()];
   state.hands[0].cards.push(draw());
@@ -303,7 +324,8 @@ function deal() {
 function promptText() {
   const hand = currentHand();
   const prefix = state.hands.length > 1 ? `Hand ${state.active + 1}: ` : '';
-  return `${prefix}${describeHand(hand.cards)} vs dealer ${RANKS[state.dealer[0].rank]}`;
+  const desc = opts.showTotals ? describeHand(hand.cards) : hand.cards.map(c => RANKS[c.rank]).join(', ');
+  return `${prefix}${desc} vs dealer ${RANKS[state.dealer[0].rank]}`;
 }
 
 function act(action) {
@@ -426,9 +448,33 @@ function recordDecision(hand, ctx, action) {
   const row = ROWS[s.rowKey];
   const correct = action === s.action;
   const situation = `${describeHand(hand.cards)} vs ${DEALER_COLS[s.col]}`;
+  // Explain when the chart's preferred action isn't legal and its fallback applies.
+  const preferred = { Dh: 'D', Ds: 'D', Uh: 'R', Us: 'R', Usp: 'R' }[s.code];
+  const why = preferred === 'R' ? (hand.cards.length > 2 ? 'after hitting' : hand.fromSplit ? 'after a split' : 'with surrender turned off')
+    : hand.cards.length > 2 ? 'after hitting' : 'without enough bank';
+  const fallback = preferred && preferred !== s.action
+    ? ` — ${ACTION_NAMES[preferred]} isn't allowed ${why}, so the fallback is ${ACTION_NAMES[s.action]}` : '';
+  const detail = `${situation}: chart says ${s.code} (${CODE_TEXT[s.code]})${fallback}`;
+
+  // Looked at the chart this round: give feedback but leave the stats alone.
+  if (state.peeked) {
+    if (correct) {
+      state.correction = null;
+      Sound.play('correct');
+      setFeedback('good', `✓ Correct — ${ACTION_NAMES[action]} (not counted)`, `${detail} · ${PEEK_NOTE}`);
+    } else {
+      Sound.play('wrong');
+      state.correction = { rowKey: s.rowKey, col: s.col, code: s.code, situation,
+        chose: ACTION_NAMES[action], correct: ACTION_NAMES[s.action] };
+      setFeedback('bad', `✗ You chose ${ACTION_NAMES[action]} — correct play is ${ACTION_NAMES[s.action]} (not counted)`,
+        `${detail} · ${row.label} row · ${PEEK_NOTE}`);
+    }
+    return;
+  }
 
   stats.decisions++;
   stats.cats[row.category].n++;
+  stats.cats[row.category].acts[s.action].n++;
   const cellKey = `${s.rowKey}:${s.col}`;
   const cell = stats.cells[cellKey] || (stats.cells[cellKey] = { n: 0, miss: 0 });
   cell.n++;
@@ -436,12 +482,12 @@ function recordDecision(hand, ctx, action) {
   if (correct) {
     stats.correct++;
     stats.cats[row.category].c++;
+    stats.cats[row.category].acts[s.action].c++;
     stats.streak++;
     stats.best = Math.max(stats.best, stats.streak);
     state.correction = null;
     Sound.play('correct');
-    setFeedback('good', `✓ Correct — ${ACTION_NAMES[action]}`,
-      `${situation}: chart says ${s.code} (${CODE_TEXT[s.code]})`);
+    setFeedback('good', `✓ Correct — ${ACTION_NAMES[action]}`, detail);
   } else {
     stats.streak = 0;
     cell.miss++;
@@ -451,7 +497,7 @@ function recordDecision(hand, ctx, action) {
     state.correction = { rowKey: s.rowKey, col: s.col, code: s.code, situation,
       chose: ACTION_NAMES[action], correct: ACTION_NAMES[s.action] };
     setFeedback('bad', `✗ You chose ${ACTION_NAMES[action]} — correct play is ${ACTION_NAMES[s.action]}`,
-      `${situation}: chart says ${s.code} (${CODE_TEXT[s.code]}) · ${row.label} row`);
+      `${detail} · ${row.label} row`);
   }
   state.lastCell = cellKey;
   saveStats();
@@ -462,6 +508,8 @@ function recordDecision(hand, ctx, action) {
 // ---------------------------------------------------------------------------
 const $ = id => document.getElementById(id);
 let feedback = { kind: 'neutral', title: '', detail: '' };
+
+const PEEK_NOTE = 'Strategy chart was open this hand, so its decisions are not counted in your stats';
 
 function setFeedback(kind, title, detail) { feedback = { kind, title, detail }; }
 
@@ -513,7 +561,7 @@ function render() {
     const shown = state.holeHidden ? [state.dealer[0]] : state.dealer;
     dealerBox.appendChild(handEl(state.dealer, {
       hideHole: state.holeHidden,
-      total: state.holeHidden ? `Showing ${state.dealer[0].value === 11 ? 'A' : state.dealer[0].value}` : totalText(shown),
+      total: !opts.showTotals ? '' : state.holeHidden ? `Showing ${state.dealer[0].value === 11 ? 'A' : state.dealer[0].value}` : totalText(shown),
     }));
   }
 
@@ -521,7 +569,7 @@ function render() {
   const handsBox = $('hands');
   handsBox.innerHTML = '';
   state.hands.forEach((h, i) => {
-    const total = `${totalText(h.cards)} · ${money(h.bet)}`;
+    const total = opts.showTotals ? `${totalText(h.cards)} · ${money(h.bet)}` : money(h.bet);
     handsBox.appendChild(handEl(h.cards, {
       active: state.phase === 'player' && i === state.active && state.hands.length > 1,
       total, result: h.result,
@@ -537,7 +585,9 @@ function render() {
   const fb = $('feedback');
   fb.className = 'feedback ' + feedback.kind;
   let detail = feedback.detail;
+  if (state.phase === 'player' && feedback.kind === 'neutral') detail = promptText(); // follows the totals toggle
   if (state.phase === 'player' && feedback.kind !== 'neutral') detail += ` — Next: ${promptText()}`;
+  if (state.phase === 'player' && feedback.kind === 'neutral' && state.peeked) detail += ` — ${PEEK_NOTE}.`;
   if (state.phase === 'done') detail += ' — Press Space to deal.';
   fb.innerHTML = `<div>${feedback.title}</div>${detail ? `<small>${detail}</small>` : ''}`;
 
@@ -572,11 +622,12 @@ function renderStats() {
   $('st-hands').textContent = stats.hands;
   $('st-net').textContent = (stats.won > 0 ? '+' : '') + money(stats.won);
 
-  $('cats').innerHTML = [['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']].map(([k, name]) => {
-    const { n, c } = stats.cats[k];
+  const catRow = (name, { n, c }, sub = false) => {
     const w = n ? (c / n) * 100 : 0;
-    return `<div class="cat-row"><span>${name}</span><div class="bar"><i style="width:${w}%"></i></div><span>${c}/${n} · ${pct(c, n)}</span></div>`;
-  }).join('');
+    return `<div class="cat-row${sub ? ' sub' : ''}"><span>${name}</span><div class="bar"><i style="width:${w}%"></i></div><span>${c}/${n} · ${pct(c, n)}</span></div>`;
+  };
+  $('cats').innerHTML = [['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']].map(([k, name]) =>
+    catRow(name, stats.cats[k]) + CATEGORY_ACTIONS[k].map(a => catRow(ACTION_NAMES[a], stats.cats[k].acts[a], true)).join('')).join('');
 
   $('mistakes').innerHTML = stats.mistakes.length
     ? stats.mistakes.slice(0, 25).map(m =>
@@ -653,8 +704,15 @@ document.querySelectorAll('[data-chip]').forEach(b =>
   b.addEventListener('click', () => addChip(Number(b.dataset.chip))));
 $('bet-clear').addEventListener('click', () => { wallet.bet = 0; Sound.play('chip'); saveBank(); render(); });
 $('bet-max').addEventListener('click', () => { wallet.bet = wallet.bank; Sound.play('chip'); saveBank(); render(); });
-$('opt-sound').checked = Sound.enabled;
-$('opt-sound').addEventListener('change', e => { Sound.enabled = e.target.checked; });
+function showVolume() {
+  const pctVol = Math.round(Sound.volume * 100);
+  $('opt-volume').value = pctVol;
+  $('opt-volume').style.setProperty('--fill', pctVol + '%');
+  $('volume-pct').textContent = pctVol ? pctVol + '%' : 'Muted';
+}
+showVolume();
+$('opt-volume').addEventListener('input', e => { Sound.volume = e.target.value / 100; showVolume(); });
+$('opt-volume').addEventListener('change', () => Sound.play('chip')); // preview once released
 $('reset-bank').addEventListener('click', () => {
   if (state.phase === 'player' || state.phase === 'dealer') return;
   if (!confirm(`Reset your bank to ${money(STARTING_BANK)}?`)) return;
@@ -664,9 +722,17 @@ $('reset-bank').addEventListener('click', () => {
   setFeedback('neutral', `Bank reset to ${money(STARTING_BANK)}.`, 'Place a bet and deal.');
   render();
 });
-$('opt-surrender').addEventListener('change', e => { opts.surrender = e.target.checked; render(); });
-$('opt-h17').addEventListener('change', e => { opts.h17 = e.target.checked; });
-$('opt-dealer-delay').addEventListener('change', e => { opts.animate = e.target.checked; });
+$('chart-panel').addEventListener('toggle', () => {
+  if ($('chart-panel').open && state.phase === 'player' && !state.peeked) {
+    state.peeked = true;
+    render();
+  }
+});
+// Browsers can restore checkbox state on reload without firing 'change'; opts is the source of truth.
+for (const [id, key] of [['opt-surrender', 'surrender'], ['opt-h17', 'h17'], ['opt-totals', 'showTotals'], ['opt-dealer-delay', 'animate']]) {
+  $(id).checked = opts[key];
+  $(id).addEventListener('change', e => { opts[key] = e.target.checked; saveOpts(); render(); });
+}
 
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -675,8 +741,8 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     deal();
   } else if (k === 'm') {
-    Sound.enabled = !Sound.enabled;
-    $('opt-sound').checked = Sound.enabled;
+    Sound.toggleMute();
+    showVolume();
   } else if ({ h: 'H', s: 'S', d: 'D', p: 'P', r: 'R' }[k]) {
     act({ h: 'H', s: 'S', d: 'D', p: 'P', r: 'R' }[k]);
   }

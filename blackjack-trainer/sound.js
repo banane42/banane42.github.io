@@ -2,12 +2,24 @@
 
 // Synthesized sound effects (Web Audio API) so no audio files are needed.
 const Sound = (() => {
-  const STORE_KEY = 'bjtrainer.sound.v1';
-  let enabled = true;
+  const STORE_KEY = 'bjtrainer.sound.v2';
+  const OLD_KEY = 'bjtrainer.sound.v1'; // on/off boolean before the volume slider
+  let volume = 1;   // 0–1; 0 is muted
+  let restore = 1;  // volume to return to when unmuting
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY));
-    if (typeof saved === 'boolean') enabled = saved;
+    if (saved && typeof saved.volume === 'number') {
+      volume = Math.min(1, Math.max(0, saved.volume));
+      if (typeof saved.restore === 'number' && saved.restore > 0) restore = saved.restore;
+    } else if (JSON.parse(localStorage.getItem(OLD_KEY)) === false) {
+      volume = 0;
+    }
   } catch (e) { /* ignore */ }
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ volume, restore })); } catch (e) { /* ignore */ }
+  }
+  // Squared so the slider feels roughly linear in loudness; full volume matches the old fixed 0.5.
+  const masterGain = () => 0.5 * volume * volume;
 
   let ctx = null;
   let master = null;
@@ -20,7 +32,7 @@ const Sound = (() => {
       if (!AC) return null;
       ctx = new AC();
       master = ctx.createGain();
-      master.gain.value = 0.5;
+      master.gain.value = masterGain();
       master.connect(ctx.destination);
       noiseBuffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
       const data = noiseBuffer.getChannelData(0);
@@ -82,16 +94,19 @@ const Sound = (() => {
   return {
     // when: seconds from now to start the sound
     play(name, when = 0) {
-      if (!enabled || !SOUNDS[name]) return;
+      if (!volume || !SOUNDS[name]) return;
       try {
         if (!audio()) return;
         SOUNDS[name](when);
       } catch (e) { /* never let audio break the game */ }
     },
-    get enabled() { return enabled; },
-    set enabled(v) {
-      enabled = !!v;
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(enabled)); } catch (e) { /* ignore */ }
+    get volume() { return volume; },
+    set volume(v) {
+      volume = Math.min(1, Math.max(0, Number(v) || 0));
+      if (volume) restore = volume;
+      if (master) master.gain.setTargetAtTime(masterGain(), ctx.currentTime, 0.01);
+      save();
     },
+    toggleMute() { this.volume = volume ? 0 : restore; },
   };
 })();

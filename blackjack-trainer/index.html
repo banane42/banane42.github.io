@@ -151,19 +151,48 @@
   aside { display: flex; flex-direction: column; gap: 16px; }
   .panel { background: var(--panel); border: 1px solid #23392e; border-radius: 14px; padding: 14px 16px; }
   .panel h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-  .cat-row { display: grid; grid-template-columns: 56px 1fr 72px; gap: 8px; align-items: center; margin: 6px 0; font-size: 14px; }
+  .cat-row { display: grid; grid-template-columns: 76px 1fr 72px; gap: 8px; align-items: center; margin: 6px 0; font-size: 14px; }
   .bar { height: 8px; background: #26372e; border-radius: 4px; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--good); }
   .cat-row span:last-child { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .cat-row.sub { grid-template-columns: 64px 1fr 72px; margin: 3px 0 3px 12px; font-size: 12px; }
+  .cat-row.sub > span:first-child { color: var(--muted); }
+  .cat-row.sub .bar { height: 5px; }
+  .cat-row:not(.sub) + .cat-row.sub { margin-top: 2px; }
+  .cat-row.sub + .cat-row:not(.sub) { margin-top: 12px; }
   .mistakes { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow: auto; font-size: 13px; }
   .mistakes li { padding: 6px 0; border-bottom: 1px solid #1f3328; }
   .mistakes li b { color: var(--bad); }
   .mistakes li em { color: var(--good); font-style: normal; font-weight: 600; }
   .empty { color: var(--muted); font-size: 13px; }
   label.opt { display: flex; gap: 8px; align-items: center; font-size: 14px; margin: 6px 0; cursor: pointer; }
+  label.opt.volume { cursor: default; }
+  label.opt.volume input { flex: 1; min-width: 0; height: 6px; margin: 0; cursor: pointer; appearance: none; -webkit-appearance: none;
+    border-radius: 3px; background: linear-gradient(to right, var(--good) var(--fill, 100%), #26372e var(--fill, 100%)); }
+  label.opt.volume input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #f5f5f4; border: 0; }
+  label.opt.volume input::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #f5f5f4; border: 0; }
+  label.opt.volume input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  #volume-pct { width: 52px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .opt-row { display: flex; align-items: center; gap: 6px; position: relative; }
+  .info {
+    display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; flex: none;
+    border: 1px solid var(--muted); border-radius: 50%; color: var(--muted);
+    font: italic 700 10px/1 Georgia, serif; cursor: help; user-select: none;
+  }
+  .info:hover, .info:focus { color: var(--accent); border-color: var(--accent); outline: none; }
+  .info .tip {
+    display: none; position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
+    background: #0b1510; color: #d4e4da; border: 1px solid #335043; border-radius: 6px;
+    padding: 8px 10px; font: 400 12px/1.4 system-ui, sans-serif; cursor: default;
+    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  }
+  .info:hover .tip, .info:focus .tip { display: block; }
 
+  .credits { text-align: center; font-size: 12px; color: var(--muted); padding: 0 16px 20px; }
+  .credits a { color: inherit; }
   .chart-wrap { padding: 0 16px 24px; max-width: 1400px; margin: 0 auto; }
   details.panel summary { cursor: pointer; font-weight: 600; }
+  .chart-peek { margin-top: 10px; padding: 6px 10px; font-size: 13px; border-radius: 6px; background: rgba(250,204,21,.15); border: 1px solid rgba(250,204,21,.5); }
   .chart-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; margin: 12px 0; color: var(--muted); }
   .chart-legend span.code { display: inline-block; min-width: 30px; text-align: center; color: #111; font-weight: 700; border-radius: 4px; padding: 0 4px; margin-right: 4px; }
   table.chart { border-collapse: collapse; margin: 0 auto; font-size: 13px; }
@@ -248,10 +277,19 @@
     </section>
     <section class="panel">
       <h2>Options</h2>
-      <label class="opt"><input type="checkbox" id="opt-surrender" checked> Late surrender allowed</label>
-      <label class="opt"><input type="checkbox" id="opt-h17" checked> Dealer hits soft 17</label>
+      <div class="opt-row">
+        <label class="opt"><input type="checkbox" id="opt-surrender" checked> Late surrender allowed</label>
+        <span class="info" tabindex="0" aria-label="About late surrender">i<span class="tip" role="tooltip">On your first two cards you may give up the hand and get half your bet back. "Late" means it's only offered after the dealer has checked for blackjack, and not after a split. Turning it off makes the chart's surrender cells (Uh/Us/Usp) use their fallback play.</span></span>
+      </div>
+      <div class="opt-row">
+        <label class="opt"><input type="checkbox" id="opt-h17" checked> Dealer hits soft 17</label>
+        <span class="info" tabindex="0" aria-label="About dealer hits soft 17">i<span class="tip" role="tooltip">When on (H17), the dealer takes another card on a soft 17 such as A-6. When off (S17), the dealer stands on every 17. H17 is slightly worse for the player. The strategy chart here is the H17 chart either way.</span></span>
+      </div>
+      <label class="opt"><input type="checkbox" id="opt-totals" checked> Show hand totals</label>
       <label class="opt"><input type="checkbox" id="opt-dealer-delay" checked> Animate dealer draws</label>
-      <label class="opt"><input type="checkbox" id="opt-sound" checked> Sound effects <kbd>M</kbd></label>
+      <label class="opt volume">Volume <kbd>M</kbd>
+        <input type="range" id="opt-volume" min="0" max="100" step="5" value="100" aria-label="Sound effects volume">
+        <span id="volume-pct">100%</span></label>
       <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
         <button class="ghost" id="reset">Reset stats</button>
         <button class="ghost" id="reset-bank">Reset bank to $1000</button>
@@ -263,6 +301,7 @@
 <div class="chart-wrap">
   <details class="panel" id="chart-panel">
     <summary>Strategy chart (red badges = your misses on that cell, outline = last decision)</summary>
+    <div class="chart-peek">While the chart is open, decisions for the current hand aren't counted in your stats. Close it before dealing to train for real.</div>
     <div class="chart-legend">
       <div><span class="code c-S">S</span>Stand</div>
       <div><span class="code c-H">H</span>Hit</div>
@@ -276,6 +315,11 @@
     <div id="chart"></div>
   </details>
 </div>
+
+<footer class="credits">
+  Card art by John Riggles, a.k.a. "sudo_whoami", licensed
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.
+</footer>
 
 <script src="sound.js"></script>
 <script src="trainer.js"></script>
