@@ -221,10 +221,14 @@ function addChip(amount) {
 // Game state
 // ---------------------------------------------------------------------------
 const OPTS_KEY = 'bjtrainer.opts.v1';
-const opts = { surrender: true, h17: true, animate: true, showTotals: true };
+// practice: 'hard' deals normally; 'soft' / 'pair' bias the player's first two cards toward that hand type.
+const opts = { surrender: true, h17: true, animate: true, showTotals: true, practice: 'hard' };
+const PRACTICE_BIAS = 0.75; // chance a biased deal is forced; the rest stay random so the hand type isn't a given
+const PAIR_EASY_WEIGHT = 0.4; // relative odds of a forced 10-10 or A-A vs. each of 2-2 … 9-9
 try {
   const o = JSON.parse(localStorage.getItem(OPTS_KEY));
-  if (o) for (const k in opts) if (typeof o[k] === 'boolean') opts[k] = o[k];
+  if (o) for (const k in opts) if (typeof o[k] === typeof opts[k]) opts[k] = o[k];
+  if (!['hard', 'soft', 'pair'].includes(opts.practice)) opts.practice = 'hard';
 } catch (e) { /* ignore */ }
 function saveOpts() {
   try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch (e) { /* ignore */ }
@@ -245,6 +249,38 @@ const state = {
 function draw() {
   if (!state.shoe.length) state.shoe = newShoe();
   return state.shoe.pop();
+}
+
+// A made-up card (any rank/suit equally likely) matching pred. Forced practice hands use these rather than
+// pulling from the shoe, which would drain its aces and low cards and skew every later deal toward tens.
+function randomCard(pred) {
+  for (;;) {
+    const c = makeCard(Math.floor(Math.random() * 13), Math.floor(Math.random() * 4));
+    if (pred(c)) return c;
+  }
+}
+
+// The player's opening two cards, biased toward opts.practice. A normal deal is drawn first and kept if it's
+// already a pair or has an ace (soft, or a natural), so the other practice type still shows up at its usual
+// rate; only plain hard hands get swapped for the practiced type (they're burned, not returned, so the shoe
+// keeps its normal mix). Soft hands avoid A-10 (a natural, no decision).
+function playerOpening() {
+  const cards = [draw(), draw()];
+  const pair = cards[0].value === cards[1].value;
+  // In pair practice a dealt 10-10 / A-A is swappable too, so those stay rare (see PAIR_EASY_WEIGHT).
+  const easyPair = pair && opts.practice === 'pair' && cards[0].value >= 10;
+  const special = (pair || cards.some(c => c.value === 11)) && !easyPair;
+  if (opts.practice === 'hard' || special || Math.random() >= PRACTICE_BIAS) return cards;
+  if (opts.practice === 'pair') {
+    // 10-10 (always stand) and A-A (always split) teach little, so forced pairs pick each of 2–9 equally and
+    // 10s/aces at PAIR_EASY_WEIGHT of that; otherwise 10-values would be 4 of every 13 pairs.
+    let roll = Math.random() * (8 + 2 * PAIR_EASY_WEIGHT);
+    const value = roll < 8 ? 2 + Math.floor(roll) : (roll -= 8) < PAIR_EASY_WEIGHT ? 10 : 11;
+    const first = randomCard(c => c.value === value);
+    return [first, randomCard(c => c.value === value)];
+  }
+  const soft = [randomCard(c => c.value === 11), randomCard(c => c.value >= 2 && c.value <= 9)];
+  return Math.random() < 0.5 ? soft : soft.reverse();
 }
 
 function currentHand() { return state.hands[state.active]; }
@@ -290,10 +326,8 @@ function deal() {
   state.correction = null;
   state.outcome = null;
   state.peeked = $('chart-panel').open;
-  state.hands = [{ cards: [draw()], bet: wallet.bet, done: false, fromSplit: false, result: null }];
-  state.dealer = [draw()];
-  state.hands[0].cards.push(draw());
-  state.dealer.push(draw());
+  state.hands = [{ cards: playerOpening(), bet: wallet.bet, done: false, fromSplit: false, result: null }];
+  state.dealer = [draw(), draw()];
   state.active = 0;
   state.holeHidden = true;
   state.phase = 'player';
@@ -612,6 +646,12 @@ function render() {
   renderCorrection();
 }
 
+const PRACTICE_TIPS = {
+  hard: () => opts.practice === 'hard' ? 'Normal dealing (no bias).' : 'Click to go back to normal dealing.',
+  soft: on => on ? 'Dealing more soft hands. Click to go back to normal dealing.' : 'Click to deal more soft hands (an ace plus 2–9).',
+  pair: on => on ? 'Dealing more pairs. Click to go back to normal dealing.' : 'Click to deal more pairs.',
+};
+
 function pct(c, n) { return n ? Math.round((c / n) * 100) + '%' : '–'; }
 
 function renderStats() {
@@ -622,12 +662,24 @@ function renderStats() {
   $('st-hands').textContent = stats.hands;
   $('st-net').textContent = (stats.won > 0 ? '+' : '') + money(stats.won);
 
-  const catRow = (name, { n, c }, sub = false) => {
+  const catRow = (name, { n, c }, cls = '', attrs = '') => {
     const w = n ? (c / n) * 100 : 0;
-    return `<div class="cat-row${sub ? ' sub' : ''}"><span>${name}</span><div class="bar"><i style="width:${w}%"></i></div><span>${c}/${n} · ${pct(c, n)}</span></div>`;
+    return `<div class="cat-row${cls}"${attrs}><span>${name}</span><div class="bar"><i style="width:${w}%"></i></div><span>${c}/${n} · ${pct(c, n)}</span></div>`;
   };
-  $('cats').innerHTML = [['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']].map(([k, name]) =>
-    catRow(name, stats.cats[k]) + CATEGORY_ACTIONS[k].map(a => catRow(ACTION_NAMES[a], stats.cats[k].acts[a], true)).join('')).join('');
+  $('cats').innerHTML = [['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']].map(([k, name]) => {
+    const on = opts.practice === k && k !== 'hard';
+    const attrs = ` data-practice="${k}" role="button" tabindex="0" aria-pressed="${on}" title="${PRACTICE_TIPS[k](on)}"`;
+    return catRow(name, stats.cats[k], on ? ' practice on' : ' practice', attrs) +
+      CATEGORY_ACTIONS[k].map(a => catRow(ACTION_NAMES[a], stats.cats[k].acts[a], ' sub')).join('');
+  }).join('');
+
+  // Decisions aren't counted while the chart is open, or for the rest of a hand it was opened during.
+  const chartOpen = $('chart-panel').open;
+  const peekedHand = state.peeked && (state.phase === 'player' || state.phase === 'dealer');
+  $('cats-wrap').classList.toggle('paused', chartOpen || peekedHand);
+  $('cats-paused').innerHTML = chartOpen
+    ? '<span>Strategy chart is open, so decisions aren\'t counted in your stats. Close it before the next deal to count again.</span>'
+    : peekedHand ? '<span>Strategy chart was opened this hand, so its decisions aren\'t counted. Counting resumes next deal.</span>' : '';
 
   $('mistakes').innerHTML = stats.mistakes.length
     ? stats.mistakes.slice(0, 25).map(m =>
@@ -723,10 +775,25 @@ $('reset-bank').addEventListener('click', () => {
   render();
 });
 $('chart-panel').addEventListener('toggle', () => {
-  if ($('chart-panel').open && state.phase === 'player' && !state.peeked) {
-    state.peeked = true;
-    render();
-  }
+  if ($('chart-panel').open && state.phase === 'player') state.peeked = true;
+  render(); // also refreshes the "not counted" overlay on the accuracy panel
+});
+function setPractice(k) {
+  opts.practice = k === opts.practice ? 'hard' : k;
+  saveOpts();
+  render();
+}
+$('cats').addEventListener('click', e => {
+  const row = e.target.closest('[data-practice]');
+  if (row) setPractice(row.dataset.practice);
+});
+$('cats').addEventListener('keydown', e => {
+  const row = e.target.closest('[data-practice]');
+  if (!row || (e.key !== 'Enter' && e.key !== ' ')) return;
+  e.preventDefault();
+  e.stopPropagation(); // don't let Space/Enter also deal
+  setPractice(row.dataset.practice);
+  $('cats').querySelector(`[data-practice="${row.dataset.practice}"]`).focus();
 });
 // Browsers can restore checkbox state on reload without firing 'change'; opts is the source of truth.
 for (const [id, key] of [['opt-surrender', 'surrender'], ['opt-h17', 'h17'], ['opt-totals', 'showTotals'], ['opt-dealer-delay', 'animate']]) {
