@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Password Log Cards</title>
+<style>
+  /* Cards are 2 1/16" x 3 5/16". Nine per Letter sheet (3 x 3). Print at 100% scale. Cut on the dashed lines. */
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #777; font-family: Arial, Helvetica, sans-serif; color: #000;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sheet { width: 8.5in; height: 11in; background: #fff; margin: 0.3in auto; padding: 0.5in 1.156in; }
+  .grid { display: grid; grid-template-columns: repeat(3, 2.0625in); grid-template-rows: repeat(3, 3.3125in); }
+  @media print {
+    .sheet { margin: 0; height: 10.9in; overflow: hidden; }
+  }
+  .card { width: 2.0625in; height: 3.3125in; border: 0.5px dashed #888; padding: 0.07in 0.09in; display: flex; flex-direction: column; overflow: hidden; }
+  .sys { display: flex; align-items: flex-end; flex: none; height: 0.3in; border-bottom: 2px solid #000; padding-bottom: 2px; }
+  .sys b { font-size: 7.5pt; white-space: nowrap; margin-right: 4px; }
+  .entry { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; border-bottom: 1.5px solid #000; padding: 0.03in 0; }
+  .entry:last-child { border-bottom: none; }
+  .ln { display: flex; align-items: flex-end; font-size: 6.5pt; height: 0.17in; }
+  .ln b { white-space: nowrap; margin-right: 3px; font-weight: bold; }
+  .ln i { flex: 1; border-bottom: 1.25px solid #000; height: 0.12in; }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+<div class="grid">
+
+<!--CARD-->
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+<div class="card">
+  <div class="sys"><b>SYSTEM:</b><i style="flex:1"></i></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+  <div class="entry"><div class="ln"><b>Date:</b><i></i></div><div class="ln"><b>LUKS:</b><i></i></div><div class="ln"><b>Username:</b><i></i></div><div class="ln"><b>Password:</b><i></i></div></div>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
