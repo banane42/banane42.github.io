@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NCO Leader's Book - Pocket Cards</title>
+<style>
+  /* Print on letter paper, portrait, scale 100%. Each sheet = 4 cards (3.5in x 5in). Cut on the dashed lines. */
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #777; color: #000; }
+  .sheet { background: #fff; width: 7.5in; padding: 0.5in; margin: 0.3in auto; break-after: page; }
+  .sheet:last-child { break-after: auto; }
+  .grid { display: grid; grid-template-columns: 3.5in 3.5in; grid-template-rows: 5in 5in; width: 7in; height: 10in; }
+  @media print {
+    body { background: #fff; }
+    .sheet { width: 8.5in; height: 10.9in; padding: 0.45in 0.75in; margin: 0; overflow: hidden; }
+  }
+  .card { width: 3.5in; height: 5in; padding: 0.1in 0.12in; border: 0.5px dashed #888; overflow: hidden; font-size: 6.6pt; line-height: 1.18; }
+  .card h1 { margin: 0 0 3px; font-size: 9pt; border-bottom: 1.5px solid #000; padding-bottom: 1px; display: flex; justify-content: space-between; }
+  .card h1 small { font-size: 5.5pt; font-weight: normal; align-self: flex-end; }
+  .card h2 { margin: 5px 0 2px; font-size: 7.5pt; border-bottom: 1px solid #000; }
+  .r { display: flex; align-items: flex-end; margin: 2px 0; }
+  .r b { white-space: nowrap; margin-right: 3px; }
+  .r i { flex: 1; border-bottom: 0.5px solid #000; height: 9px; }
+  .r.tall i { height: 14px; }
+  .n { display: flex; gap: 3px; margin: 2px 0; align-items: flex-start; }
+  .n > b { width: 9px; flex: none; font-size: 8pt; }
+  .n > div { flex: 1; }
+  .n .opt { font-size: 5.7pt; color: #222; }
+  .n .w { border-bottom: 0.5px solid #000; height: 10px; margin-top: 1px; }
+  .two { display: flex; gap: 6px; }
+  .two > div { flex: 1; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { border: 0.5px solid #000; padding: 1px 2px; vertical-align: top; font-size: 6.2pt; }
+  th { background: #ddd; text-align: left; }
+  .chk { display: inline-block; width: 6px; height: 6px; border: 0.5px solid #000; vertical-align: middle; margin: 0 2px 0 3px; }
+  .tip { font-size: 5.6pt; margin-top: 3px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- SHEET 1: reference cards -->
+<div class="sheet">
+<div class="grid">
+
+  <!-- CARD 1: 9-LINE -->
+  <div class="card">
+    <h1>9-LINE MEDEVAC <small>Send lines 1-5 first</small></h1>
+    <div class="n"><b>1</b><div><b>Location</b> <span class="opt">(8-digit grid)</span><div class="w"></div></div></div>
+    <div class="n"><b>2</b><div><b>Freq / Call sign / Suffix</b><div class="w"></div></div></div>
+    <div class="n"><b>3</b><div><b>Patients by precedence</b> <span class="opt">A Urgent (1 hr) B Urgent-Surg C Priority (4 hr) D Routine (24 hr) E Convenience</span><div class="w"></div></div></div>
+    <div class="n"><b>4</b><div><b>Special equipment</b> <span class="opt">A None B Hoist C Extraction D Ventilator</span><div class="w"></div></div></div>
+    <div class="n"><b>5</b><div><b>Patients by type</b> <span class="opt">L = litter, A = ambulatory (+ number)</span><div class="w"></div></div></div>
+    <div class="n"><b>6</b><div><b>Security</b> <span class="opt">N none P possible E enemy in area X escort req. (peacetime: # &amp; type of wound/injury/illness)</span><div class="w"></div></div></div>
+    <div class="n"><b>7</b><div><b>Marking</b> <span class="opt">A Panels B Pyro C Smoke D None E Other</span><div class="w"></div></div></div>
+    <div class="n"><b>8</b><div><b>Nationality / status</b> <span class="opt">A US mil B US civ C Non-US mil D Non-US civ E EPW</span><div class="w"></div></div></div>
+    <div class="n"><b>9</b><div><b>CBRN / terrain</b> <span class="opt">C B R N (peacetime: terrain description)</span><div class="w"></div></div></div>
+    <h2>MIST</h2>
+    <div class="r"><b>M</b><i></i></div>
+    <div class="r"><b>I</b><i></i></div>
+    <div class="r"><b>S</b><i></i></div>
+    <div class="r"><b>T</b><i></i></div>
+    <div class="tip">Treat first. Verify codes against unit SOP.</div>
+  </div>
+
+  <!-- CARD 2: SALUTE + LACE -->
+  <div class="card">
+    <h1>SALUTE <small>Report what you SEE</small></h1>
+    <div class="r tall"><b>S</b>ize<i></i></div>
+    <div class="r tall"><b>A</b>ctivity<i></i></div>
+    <div class="r tall"><b>L</b>ocation<i></i></div>
+    <div class="r tall"><b>U</b>nit<i></i></div>
+    <div class="r tall"><b>T</b>ime (DTG)<i></i></div>
+    <div class="r tall"><b>E</b>quipment<i></i></div>
+    <h1 style="margin-top:8px">LACE <small>After contact / on request</small></h1>
+    <div class="r tall"><b>L</b>iquids (water / fuel)<i></i></div>
+    <div class="r tall"><b>A</b>mmo (by type)<i></i></div>
+    <div class="r tall"><b>C</b>asualties (U / P / R / KIA)<i></i></div>
+    <div class="r tall"><b>E</b>quipment (damaged / lost)<i></i></div>
+    <div class="tip">Use % or color (G/A/R/B) per unit SOP.</div>
+  </div>
+
+  <!-- CARD 3: PACE + GOTWA -->
+  <div class="card">
+    <h1>PACE PLAN <small>Different methods; set triggers</small></h1>
+    <div class="r tall"><b>P</b>rimary<i></i></div>
+    <div class="r tall"><b>A</b>lternate<i></i></div>
+    <div class="r tall"><b>C</b>ontingency<i></i></div>
+    <div class="r tall"><b>E</b>mergency<i></i></div>
+    <div class="r tall"><b>Trigger:</b><i></i></div>
+    <h1 style="margin-top:8px">GOTWA <small>Brief every time you leave</small></h1>
+    <div class="r tall"><b>G</b>oing (where)<i></i></div>
+    <div class="r tall"><b>O</b>thers with me<i></i></div>
+    <div class="r tall"><b>T</b>ime gone<i></i></div>
+    <div class="r tall"><b>W</b>hat to do if I don't return<i></i></div>
+    <div class="r tall"><b>A</b>ctions on enemy contact<i></i></div>
+  </div>
+
+  <!-- CARD 4: TLP -->
+  <div class="card">
+    <h1>TROOP LEADING PROCEDURES</h1>
+    <table>
+      <tr><td><b>1</b></td><td><b>Receive the mission</b></td></tr>
+      <tr><td><b>2</b></td><td><b>Issue a warning order</b></td></tr>
+      <tr><td><b>3</b></td><td><b>Make a tentative plan</b></td></tr>
+      <tr><td><b>4</b></td><td><b>Initiate movement</b></td></tr>
+      <tr><td><b>5</b></td><td><b>Conduct reconnaissance</b></td></tr>
+      <tr><td><b>6</b></td><td><b>Complete the plan</b></td></tr>
+      <tr><td><b>7</b></td><td><b>Issue the order</b></td></tr>
+      <tr><td><b>8</b></td><td><b>Supervise &amp; refine</b> (rehearse, PCC/PCI, backbrief)</td></tr>
+    </table>
+    <div class="tip">Steps overlap; they are not always in order. Use 1/3 of time to plan, leave 2/3 for subordinates.</div>
+    <h2>METT-TC</h2>
+    <div>Mission &bull; Enemy &bull; Terrain &amp; weather &bull; Troops &amp; support available &bull; Time available &bull; Civil considerations</div>
+    <h2>OPORD</h2>
+    <div>1 Situation &bull; 2 Mission &bull; 3 Execution &bull; 4 Sustainment &bull; 5 Command &amp; Signal</div>
+    <h2>Time Schedule</h2>
+    <div class="r tall"><b>Mission rec'd:</b><i></i></div>
+    <div class="r tall"><b>WARNORD out:</b><i></i></div>
+    <div class="r tall"><b>OPORD issued:</b><i></i></div>
+    <div class="r tall"><b>Rehearsal / PCI:</b><i></i></div>
+    <div class="r tall"><b>LD / start:</b><i></i></div>
+  </div>
+
+</div>
+</div>
+
+<!-- SHEETS 2-3: soldier data cards (4 per sheet) -->
+<div class="sheet">
+<div class="grid">
+  <!--SOLDIER-->
+  <div class="card ds">
+    <h1>SOLDIER DATA <small>PII - safeguard</small></h1>
+    <div class="r"><b>Rank/Name:</b><i></i></div>
+    <div class="r"><b>DOB:</b><i></i></div>
+    <div class="r"><b>DODID:</b><i></i></div>
+    <div class="r"><b>Religion:</b><i></i></div>
+    <div class="r"><b>Civ job:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Email:</b><i></i></div>
+    <h2>RED TAG</h2>
+    <div>Prior heat cat<span class="chk"></span>Y<span class="chk"></span>N &nbsp; PCN allergy<span class="chk"></span>Y<span class="chk"></span>N</div>
+    <div class="r"><b>Allergies:</b><i></i></div>
+    <div class="r"><b>Medical / meds:</b><i></i></div>
+    <div class="r"><b>Profile:</b><i></i></div>
+    <div class="r"><b>Blood type:</b><i></i></div>
+    <h2>FAMILY</h2>
+    <div class="r"><b>Spouse / phone:</b><i></i></div>
+    <div class="r"><b>Children / ages:</b><i></i></div>
+    <h2>EMERGENCY CONTACT</h2>
+    <div class="r"><b>Name / rel.:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Address:</b><i></i></div>
+  </div>
+  <div class="card ds">
+    <h1>SOLDIER DATA <small>PII - safeguard</small></h1>
+    <div class="r"><b>Rank/Name:</b><i></i></div>
+    <div class="r"><b>DOB:</b><i></i></div>
+    <div class="r"><b>DODID:</b><i></i></div>
+    <div class="r"><b>Religion:</b><i></i></div>
+    <div class="r"><b>Civ job:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Email:</b><i></i></div>
+    <h2>RED TAG</h2>
+    <div>Prior heat cat<span class="chk"></span>Y<span class="chk"></span>N &nbsp; PCN allergy<span class="chk"></span>Y<span class="chk"></span>N</div>
+    <div class="r"><b>Allergies:</b><i></i></div>
+    <div class="r"><b>Medical / meds:</b><i></i></div>
+    <div class="r"><b>Profile:</b><i></i></div>
+    <div class="r"><b>Blood type:</b><i></i></div>
+    <h2>FAMILY</h2>
+    <div class="r"><b>Spouse / phone:</b><i></i></div>
+    <div class="r"><b>Children / ages:</b><i></i></div>
+    <h2>EMERGENCY CONTACT</h2>
+    <div class="r"><b>Name / rel.:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Address:</b><i></i></div>
+  </div>
+  <div class="card ds">
+    <h1>SOLDIER DATA <small>PII - safeguard</small></h1>
+    <div class="r"><b>Rank/Name:</b><i></i></div>
+    <div class="r"><b>DOB:</b><i></i></div>
+    <div class="r"><b>DODID:</b><i></i></div>
+    <div class="r"><b>Religion:</b><i></i></div>
+    <div class="r"><b>Civ job:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Email:</b><i></i></div>
+    <h2>RED TAG</h2>
+    <div>Prior heat cat<span class="chk"></span>Y<span class="chk"></span>N &nbsp; PCN allergy<span class="chk"></span>Y<span class="chk"></span>N</div>
+    <div class="r"><b>Allergies:</b><i></i></div>
+    <div class="r"><b>Medical / meds:</b><i></i></div>
+    <div class="r"><b>Profile:</b><i></i></div>
+    <div class="r"><b>Blood type:</b><i></i></div>
+    <h2>FAMILY</h2>
+    <div class="r"><b>Spouse / phone:</b><i></i></div>
+    <div class="r"><b>Children / ages:</b><i></i></div>
+    <h2>EMERGENCY CONTACT</h2>
+    <div class="r"><b>Name / rel.:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Address:</b><i></i></div>
+  </div>
+  <div class="card ds">
+    <h1>SOLDIER DATA <small>PII - safeguard</small></h1>
+    <div class="r"><b>Rank/Name:</b><i></i></div>
+    <div class="r"><b>DOB:</b><i></i></div>
+    <div class="r"><b>DODID:</b><i></i></div>
+    <div class="r"><b>Religion:</b><i></i></div>
+    <div class="r"><b>Civ job:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Email:</b><i></i></div>
+    <h2>RED TAG</h2>
+    <div>Prior heat cat<span class="chk"></span>Y<span class="chk"></span>N &nbsp; PCN allergy<span class="chk"></span>Y<span class="chk"></span>N</div>
+    <div class="r"><b>Allergies:</b><i></i></div>
+    <div class="r"><b>Medical / meds:</b><i></i></div>
+    <div class="r"><b>Profile:</b><i></i></div>
+    <div class="r"><b>Blood type:</b><i></i></div>
+    <h2>FAMILY</h2>
+    <div class="r"><b>Spouse / phone:</b><i></i></div>
+    <div class="r"><b>Children / ages:</b><i></i></div>
+    <h2>EMERGENCY CONTACT</h2>
+    <div class="r"><b>Name / rel.:</b><i></i></div>
+    <div class="r"><b>Phone:</b><i></i></div>
+    <div class="r"><b>Address:</b><i></i></div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NCO Leader's Book - Full Size</title>
+<style>
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; line-height: 1.25; color: #000; margin: 0; background: #777; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { background: #fff; width: 8.5in; min-height: 10in; padding: 0.5in; margin: 0.3in auto; break-after: page; }
+  .page:last-child { break-after: auto; }
+  @media print {
+    body { background: #fff; }
+    .page { width: auto; min-height: 0; padding: 0; margin: 0; height: 9.9in; }
+  }
+  .hdr { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #000; margin-bottom: 8px; padding-bottom: 3px; }
+  .hdr h1 { margin: 0; font-size: 18pt; letter-spacing: 0.5px; }
+  .hdr span { font-size: 8pt; text-transform: uppercase; }
+  h2 { font-size: 10pt; margin: 8px 0 3px; text-transform: uppercase; border-bottom: 1.5px solid #000; }
+  tr { break-inside: avoid; }
+  .how { border: 1.5px solid #000; background: #f0f0f0; padding: 4px 8px; margin-bottom: 6px; }
+  .how ol, .how ul { margin: 3px 0 3px 18px; padding: 0; }
+  .how li { margin: 1px 0; }
+  table.t { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  table.t th, table.t td { border: 1.5px solid #000; padding: 3px 5px; vertical-align: top; }
+  table.t th { background: #d8d8d8; text-align: left; font-size: 9pt; }
+  td.k { font-weight: bold; white-space: nowrap; }
+  .small { font-size: 8.5pt; }
+  .fill { height: 0.32in; }
+  .row { display: flex; align-items: flex-end; margin: 5px 0; }
+  .row b { white-space: nowrap; margin-right: 5px; font-size: 9.5pt; }
+  .row i { flex: 1; border-bottom: 1.5px solid #000; height: 12px; }
+  .row.half { width: 48%; display: inline-flex; vertical-align: bottom; }
+  .cols { display: flex; gap: 14px; }
+  .cols > div { flex: 1; }
+  .box { border: 1.5px solid #000; }
+  .lines { height: 0.27in; border-bottom: 1.5px solid #000; }
+  .note { font-size: 8pt; margin-top: 6px; }
+  .cover { text-align: center; padding-top: 1.2in; }
+  .cover h1 { font-size: 34pt; margin: 0; letter-spacing: 2px; }
+  .cover h3 { font-size: 14pt; margin: 4px 0 30px; font-weight: normal; }
+  .cover .row { width: 70%; margin: 16px auto; text-align: left; }
+  .toc { width: 60%; margin: 30px auto 0; text-align: left; font-size: 11pt; }
+  .toc li { margin: 3px 0; }
+  .pii { border: 2px solid #000; display: inline-block; padding: 4px 10px; font-weight: bold; font-size: 9pt; margin-top: 24px; }
+  .chk { display: inline-block; width: 10px; height: 10px; border: 1px solid #000; vertical-align: middle; margin: 0 3px 0 6px; }
+
+  .page { height: 11in; display: flex; flex-direction: column; }
+  .pc { flex: none; }
+  .nh { flex: none; margin-top: 8px; }
+  .notes { flex: 1 1 auto; min-height: 0; overflow: hidden;
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(0.27in - 1.5px), #000 calc(0.27in - 1.5px), #000 0.27in); }
+  @media print { .page { width: 8.5in !important; height: 10.9in !important; min-height: 0 !important; padding: 0.5in !important; margin: 0 !important; overflow: hidden; } }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page">
+  <div class="cover">
+    <h1>LEADER'S BOOK</h1>
+    <h3>Noncommissioned Officer</h3>
+    <div class="row"><b>Rank / Name:</b><i></i></div>
+    <div class="row"><b>Unit:</b><i></i></div>
+    <div class="row"><b>Position:</b><i></i></div>
+    <div class="row"><b>Phone:</b><i></i></div>
+    <div class="row"><b>Date Started:</b><i></i></div>
+    <ol class="toc">
+      <li>9-Line MEDEVAC Request</li>
+      <li>SALUTE Report</li>
+      <li>LACE Report</li>
+      <li>PACE Plan</li>
+      <li>Troop Leading Procedures</li>
+      <li>GOTWA (5-Point Contingency Plan)</li>
+      <li>Soldier Data Sheets</li>
+    </ol>
+    <div class="pii">CONTAINS PERSONALLY IDENTIFIABLE INFORMATION (PII) &mdash; SAFEGUARD AT ALL TIMES</div>
+    <p class="small">If found, return to the unit listed above.</p>
+  </div>
+</div>
+
+<!-- 9-LINE -->
+<div class="page"><div class="pc">
+  <div class="hdr"><h1>9-LINE MEDEVAC REQUEST</h1><span>Leader's Book</span></div>
+  <div class="how">
+    <b>HOW TO USE</b>
+    <ol>
+      <li><b>Treat first.</b> Stop life-threatening bleeding, protect the airway, treat the casualty. Have your RTO or another Soldier send the request while care continues.</li>
+      <li>Fill in the blanks below. <b>Transmit lines 1&ndash;5 first</b>; lines 6&ndash;9 can follow as time allows.</li>
+      <li>Send on the designated net using the authentication/encryption required by your unit SOP. Have the receiver read back lines 1 through 5.</li>
+      <li>Secure and mark the pickup site, prepare casualties and their gear for movement, and brief the aircrew on hazards (wires, towers, enemy fire) as they approach.</li>
+    </ol>
+  </div>
+  <table class="t">
+    <tr><th style="width:.4in">Line</th><th style="width:1.5in">Item</th><th>What to Report / Codes</th><th style="width:2in">Your Information</th></tr>
+    <tr><td class="k">1</td><td>Location of pickup site</td><td class="small">Grid coordinates (8-digit minimum) of the pickup site.</td><td class="fill"></td></tr>
+    <tr><td class="k">2</td><td>Radio frequency, call sign &amp; suffix</td><td class="small">Frequency of the radio at the pickup site, the call sign, and suffix of the person to contact.</td><td class="fill"></td></tr>
+    <tr><td class="k">3</td><td>Number of patients by precedence</td><td class="small"><b>A</b> Urgent (evac within 1 hr) &bull; <b>B</b> Urgent-Surgical &bull; <b>C</b> Priority (within 4 hrs) &bull; <b>D</b> Routine (within 24 hrs) &bull; <b>E</b> Convenience</td><td class="fill"></td></tr>
+    <tr><td class="k">4</td><td>Special equipment required</td><td class="small"><b>A</b> None &bull; <b>B</b> Hoist &bull; <b>C</b> Extraction equipment &bull; <b>D</b> Ventilator</td><td class="fill"></td></tr>
+    <tr><td class="k">5</td><td>Number of patients by type</td><td class="small"><b>L</b> + number of litter patients &bull; <b>A</b> + number of ambulatory (walking/sitting) patients</td><td class="fill"></td></tr>
+    <tr><td class="k">6</td><td>Security at pickup site</td><td class="small"><b>Wartime:</b> <b>N</b> No enemy troops in area &bull; <b>P</b> Possible enemy &bull; <b>E</b> Enemy troops in area (approach with caution) &bull; <b>X</b> Enemy in area (armed escort required).<br><b>Peacetime:</b> number and type of wound, injury, or illness.</td><td class="fill"></td></tr>
+    <tr><td class="k">7</td><td>Method of marking pickup site</td><td class="small"><b>A</b> Panels &bull; <b>B</b> Pyrotechnic signal &bull; <b>C</b> Smoke signal &bull; <b>D</b> None &bull; <b>E</b> Other</td><td class="fill"></td></tr>
+    <tr><td class="k">8</td><td>Patient nationality &amp; status</td><td class="small"><b>A</b> US military &bull; <b>B</b> US civilian &bull; <b>C</b> Non-US military &bull; <b>D</b> Non-US civilian &bull; <b>E</b> Enemy prisoner of war</td><td class="fill"></td></tr>
+    <tr><td class="k">9</td><td>CBRN contamination / terrain</td><td class="small"><b>Wartime:</b> <b>C</b> Chemical &bull; <b>B</b> Biological &bull; <b>R</b> Radiological &bull; <b>N</b> Nuclear.<br><b>Peacetime:</b> description of terrain at the pickup site.</td><td class="fill"></td></tr>
+  </table>
+  <h2>MIST Report (give to the receiving medical team)</h2>
+  <table class="t">
+    <tr><td class="k" style="width:1.6in">M &ndash; Mechanism of injury</td><td class="fill"></td></tr>
+    <tr><td class="k">I &ndash; Injuries found</td><td class="fill"></td></tr>
+    <tr><td class="k">S &ndash; Signs &amp; symptoms (pulse, breathing, level of consciousness)</td><td class="fill"></td></tr>
+    <tr><td class="k">T &ndash; Treatment given (tourniquet time, meds, etc.)</td><td class="fill"></td></tr>
+  </table>
+  <div class="note">Verify codes, call-sign procedures, and frequencies against your unit SOP and current doctrine before relying on this sheet.</div>
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+<!-- SALUTE -->
+<div class="page"><div class="pc">
+  <div class="hdr"><h1>SALUTE REPORT</h1><span>Leader's Book</span></div>
+  <div class="how">
+    <b>HOW TO USE</b>
+    <ul>
+      <li>Report what you <b>SEE</b>, not what you think. Be specific and use numbers.</li>
+      <li>Send it as soon as possible, then send updates as the situation changes.</li>
+      <li>Report in order: <b>S-A-L-U-T-E</b>. If you do not know an item, say &ldquo;unknown&rdquo; &mdash; do not guess.</li>
+    </ul>
+  </div>
+  <div class="row half"><b>Observer:</b><i></i></div>
+  <div class="row half" style="margin-left:2%"><b>Reported to:</b><i></i></div>
+  <table class="t">
+    <tr><th style="width:.4in"></th><th style="width:1.2in">Item</th><th>What to Report</th><th style="width:2.3in">Your Information</th></tr>
+    <tr><td class="k" style="font-size:16pt">S</td><td class="k">Size</td><td class="small">Number of personnel, vehicles, aircraft, or items seen.</td><td style="height:.5in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">A</td><td class="k">Activity</td><td class="small">What the enemy/subject is doing: moving, digging, firing, observing, emplacing. Include direction of travel.</td><td style="height:.5in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">L</td><td class="k">Location</td><td class="small">Grid coordinates, or distance and direction from a known point or terrain feature.</td><td style="height:.5in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">U</td><td class="k">Unit</td><td class="small">Uniforms, patches, insignia, vehicle markings, flags, language &mdash; anything that identifies who they are.</td><td style="height:.5in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">T</td><td class="k">Time</td><td class="small">Date-time group (DTG) of the observation (when you saw it, not when you reported it).</td><td style="height:.5in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">E</td><td class="k">Equipment</td><td class="small">Weapons, vehicles, radios, tools, and other gear observed.</td><td style="height:.5in"></td></tr>
+  </table>
+  <h2>Sketch / Notes</h2>
+  <div class="box" style="height:2.2in"></div>
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+<!-- LACE -->
+<div class="page"><div class="pc">
+  <div class="hdr"><h1>LACE REPORT</h1><span>Leader's Book</span></div>
+  <div class="how">
+    <b>HOW TO USE</b>
+    <ul>
+      <li>Leaders send a LACE (also called a quick status report) to higher after contact or during reorganization, and any time the commander asks for status.</li>
+      <li>Collect the numbers from your team/squad leaders quickly, consolidate, and report in order: <b>L-A-C-E</b>.</li>
+      <li>Use the status-color or percentage method your unit SOP specifies (Green / Amber / Red / Black). Request resupply for anything below your SOP's threshold.</li>
+    </ul>
+  </div>
+  <div class="row half"><b>Unit / Element:</b><i></i></div>
+  <div class="row half" style="margin-left:2%"><b>DTG:</b><i></i></div>
+  <table class="t">
+    <tr><th style="width:.4in"></th><th style="width:1.1in">Item</th><th>What to Report</th><th style="width:.9in">Status (%/color)</th><th style="width:2in">Details / Needs</th></tr>
+    <tr><td class="k" style="font-size:16pt">L</td><td class="k">Liquids</td><td class="small">Water on hand and fuel for vehicles/generators.</td><td style="height:.55in"></td><td></td></tr>
+    <tr><td class="k" style="font-size:16pt">A</td><td class="k">Ammunition</td><td class="small">Ammo by type (5.56, 7.62, .50, grenades, AT, flares, etc.) and amount remaining.</td><td style="height:.7in"></td><td></td></tr>
+    <tr><td class="k" style="font-size:16pt">C</td><td class="k">Casualties</td><td class="small">KIA, WIA by category: <b>Urgent</b>, <b>Priority</b>, <b>Routine</b>. Include names for internal use; follow your SOP for what goes over the air.</td><td style="height:.7in"></td><td></td></tr>
+    <tr><td class="k" style="font-size:16pt">E</td><td class="k">Equipment</td><td class="small">Damaged or lost weapons, vehicles, radios, NVGs, medical supplies, and other critical items.</td><td style="height:.7in"></td><td></td></tr>
+  </table>
+  <h2>Casualty Tracker</h2>
+  <table class="t">
+    <tr><th>Name</th><th style="width:1in">Category</th><th>Injury</th><th style="width:1.2in">Treatment / Time</th></tr>
+    <tr><td class="fill"></td><td></td><td></td><td></td></tr>
+    <tr><td class="fill"></td><td></td><td></td><td></td></tr>
+    <tr><td class="fill"></td><td></td><td></td><td></td></tr>
+  </table>
+  <div class="note">Resupply/requests: _________________________________________________________________________</div>
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+<!-- PACE -->
+<div class="page"><div class="pc">
+  <div class="hdr"><h1>PACE PLAN</h1><span>Leader's Book</span></div>
+  <div class="how">
+    <b>HOW TO USE</b>
+    <ul>
+      <li><b>P</b>rimary &rarr; <b>A</b>lternate &rarr; <b>C</b>ontingency &rarr; <b>E</b>mergency: four ways to communicate, in the order you will try them.</li>
+      <li>Make each method <b>different</b> (for example: FM voice, SATCOM/second radio, phone/text or messenger, runner/visual signal). If one fails, the others should not fail the same way.</li>
+      <li>Set a <b>trigger</b> for moving to the next method (for example: no response after 2 call attempts or 5 minutes).</li>
+      <li>Brief the PACE plan to every Soldier and rehearse it. Update it any time the mission, terrain, or equipment changes.</li>
+    </ul>
+  </div>
+  <div class="row half"><b>Mission / Operation:</b><i></i></div>
+  <div class="row half" style="margin-left:2%"><b>Valid until:</b><i></i></div>
+  <table class="t">
+    <tr><th style="width:1.4in">Communicate with</th><th>P &ndash; Primary</th><th>A &ndash; Alternate</th><th>C &ndash; Contingency</th><th>E &ndash; Emergency</th></tr>
+    <tr><td class="k">Higher HQ</td><td style="height:.6in"></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">Subordinate leaders / team leaders</td><td style="height:.6in"></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">Medical / MEDEVAC</td><td style="height:.6in"></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">Fires / support</td><td style="height:.6in"></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">Logistics / resupply</td><td style="height:.6in"></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">Other:</td><td style="height:.6in"></td><td></td><td></td><td></td></tr>
+  </table>
+  <h2>Details (frequencies, channels, call signs, signals, trigger times)</h2>
+  <div class="lines"></div><div class="lines"></div><div class="lines"></div><div class="lines"></div><div class="lines"></div>
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+<!-- TLP -->
+<div class="page"><div class="pc">
+  <div class="hdr"><h1>TROOP LEADING PROCEDURES</h1><span>Leader's Book</span></div>
+  <div class="how">
+    <b>HOW TO USE</b>
+    <ul>
+      <li>TLP is the 8-step process a small-unit leader uses to turn a mission into an executed plan. Steps are not always sequential &mdash; several happen at the same time.</li>
+      <li><b>1/3 &ndash; 2/3 Rule:</b> use no more than one-third of the available time to plan and issue the order; leave two-thirds for subordinates to prepare.</li>
+      <li>Work backward from the start time. Write times in the last column and check each step off.</li>
+    </ul>
+  </div>
+  <table class="t">
+    <tr><th style="width:.3in">#</th><th style="width:1.5in">Step</th><th>Key Actions</th><th style="width:.8in">Time / Done</th></tr>
+    <tr><td class="k">1</td><td class="k">Receive the mission</td><td class="small">Read the order (WARNORD, OPORD, or FRAGORD). Identify the mission, task and purpose, and time available. Make a time schedule.</td><td></td></tr>
+    <tr><td class="k">2</td><td class="k">Issue a warning order</td><td class="small">Alert your Soldiers early: situation, mission, general instructions, when/where the OPORD will be issued, and what they must start preparing now.</td><td></td></tr>
+    <tr><td class="k">3</td><td class="k">Make a tentative plan</td><td class="small">Analyze the mission using METT-TC, develop courses of action, compare, and pick one. Update the plan as new information arrives.</td><td></td></tr>
+    <tr><td class="k">4</td><td class="k">Initiate movement</td><td class="small">Begin any movement needed to prepare or position the unit (assembly area, recon teams, vehicles, supplies).</td><td></td></tr>
+    <tr><td class="k">5</td><td class="k">Conduct reconnaissance</td><td class="small">Confirm the terrain, enemy, routes, and objective by map, imagery, and on-the-ground recon whenever possible. Update the plan with what you learn.</td><td></td></tr>
+    <tr><td class="k">6</td><td class="k">Complete the plan</td><td class="small">Finalize the plan with recon results. Prepare the overlay/sketch, task organization, and a clear concept of operations. Confirm coordination with adjacent units.</td><td></td></tr>
+    <tr><td class="k">7</td><td class="k">Issue the order</td><td class="small">Brief the OPORD in the 5-paragraph format, with a terrain model or sketch if possible. Confirm understanding.</td><td></td></tr>
+    <tr><td class="k">8</td><td class="k">Supervise and refine</td><td class="small">Conduct backbriefs, rehearsals, precombat checks (PCCs), and precombat inspections (PCIs). Check, fix, and adjust. This step continues until execution.</td><td></td></tr>
+  </table>
+  <div class="cols">
+    <div>
+      <h2>METT-TC</h2>
+      <div class="small">
+        <b>M</b>ission &bull; <b>E</b>nemy &bull; <b>T</b>errain &amp; weather<br>
+        <b>T</b>roops &amp; support available &bull; <b>T</b>ime available<br>
+        <b>C</b>ivil considerations
+      </div>
+    </div>
+    <div>
+      <h2>5-Paragraph OPORD</h2>
+      <div class="small">
+        1. Situation &bull; 2. Mission &bull; 3. Execution<br>
+        4. Sustainment &bull; 5. Command &amp; Signal
+      </div>
+    </div>
+  </div>
+  <h2>Time Schedule / Notes</h2>
+  <div class="lines"></div><div class="lines"></div><div class="lines"></div>
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+<!-- GOTWA -->
+<div class="page"><div class="pc">
+  <div class="hdr"><h1>GOTWA &ndash; 5-POINT CONTINGENCY PLAN</h1><span>Leader's Book</span></div>
+  <div class="how">
+    <b>HOW TO USE</b>
+    <ul>
+      <li>Give a GOTWA to your second-in-command (or the senior Soldier left behind) <b>every time you leave the unit or position</b> &mdash; for a recon, a leader's meeting, a patrol, or any time you are away from your Soldiers.</li>
+      <li>Say it out loud, make sure it is understood, and write it down. Update it when you return.</li>
+    </ul>
+  </div>
+  <div class="row half"><b>Date / Time:</b><i></i></div>
+  <div class="row half" style="margin-left:2%"><b>Briefed to:</b><i></i></div>
+  <table class="t">
+    <tr><th style="width:.4in"></th><th style="width:1.7in">Item</th><th>What to Cover</th><th style="width:2.2in">Your Information</th></tr>
+    <tr><td class="k" style="font-size:16pt">G</td><td class="k">Where I am <u>G</u>oing</td><td class="small">Destination, route, and purpose. Be specific (grid or named location).</td><td style="height:.55in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">O</td><td class="k"><u>O</u>thers I am taking with me</td><td class="small">Names of every person going with you.</td><td style="height:.55in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">T</td><td class="k"><u>T</u>ime I will be gone</td><td class="small">Expected departure and return times, and how long before you are considered overdue.</td><td style="height:.55in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">W</td><td class="k"><u>W</u>hat to do if I do not return</td><td class="small">Who takes charge, when to start a search or report me overdue, whether to continue the mission, and where to move.</td><td style="height:.55in"></td></tr>
+    <tr><td class="k" style="font-size:16pt">A</td><td class="k"><u>A</u>ctions on enemy contact / actions if the unit makes contact</td><td class="small">What the element left behind does if it makes contact, and what my party will do if it makes contact (return fire, break contact, rally point, link-up).</td><td style="height:.7in"></td></tr>
+  </table>
+  <h2>Rally point / Link-up / Challenge-password / Other</h2>
+  <div class="lines"></div><div class="lines"></div><div class="lines"></div>
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+<!-- SOLDIER DATA SHEET (print one per Soldier) -->
+<div class="page ds"><div class="pc">
+  <div class="hdr"><h1>SOLDIER DATA SHEET</h1><span>Contains PII &ndash; safeguard</span></div>
+  <div class="how small" style="padding:4px 8px">Fill out one sheet per Soldier. Update after any change in status, medical condition, or contact information. Print or copy one per Soldier.</div>
+
+  <h2>Personal</h2>
+  <div class="row half"><b>Rank:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Last, First MI:</b><i></i></div>
+  <div class="row half"><b>Date of Birth:</b><i></i></div><div class="row half" style="margin-left:2%"><b>DODID (EDIPI):</b><i></i></div>
+  <div class="row half"><b>MOS / Duty position:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Religion:</b><i></i></div>
+  <div class="row half"><b>Civilian job / employer:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Blood type:</b><i></i></div>
+  <div class="row half"><b>Cell phone:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Email:</b><i></i></div>
+  <div class="row"><b>Home address:</b><i></i></div>
+
+  <h2>Red Tag Items (medical / readiness)</h2>
+  <div class="small" style="margin:4px 0">
+    Prior heat injury (heat cat): <span class="chk"></span>Yes <span class="chk"></span>No &nbsp; Date/Category: ________________<br>
+    <div style="margin-top:6px">Penicillin allergy: <span class="chk"></span>Yes <span class="chk"></span>No &nbsp;&nbsp;&nbsp; Other drug allergies: <span class="chk"></span>Yes <span class="chk"></span>No</div>
+  </div>
+  <div class="row"><b>Allergies (list / reaction):</b><i></i></div>
+  <div class="row"><b>Medical conditions (asthma, etc.):</b><i></i></div>
+  <div class="row"><b>Medications:</b><i></i></div>
+  <div class="row"><b>Profile / limitations (type &amp; expiration):</b><i></i></div>
+  <div class="row"><b>Other (glasses/inserts, prior injuries, etc.):</b><i></i></div>
+
+  <h2>Family Information</h2>
+  <div class="row half"><b>Marital status:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Spouse name:</b><i></i></div>
+  <div class="row half"><b>Spouse phone:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Spouse email:</b><i></i></div>
+  <div class="row"><b>Children (name / age):</b><i></i></div>
+  <div class="row"><b>Other dependents / special needs:</b><i></i></div>
+
+  <h2>Emergency Contact</h2>
+  <div class="row half"><b>Name:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Relationship:</b><i></i></div>
+  <div class="row half"><b>Phone:</b><i></i></div><div class="row half" style="margin-left:2%"><b>Alt phone:</b><i></i></div>
+  <div class="row"><b>Address:</b><i></i></div>
+  <div class="row"><b>Secondary contact (name / relationship / phone):</b><i></i></div>
+
+</div><h2 class="nh">Notes</h2><div class="notes"></div></div>
+
+</body>
+</html>
