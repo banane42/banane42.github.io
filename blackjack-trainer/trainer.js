@@ -186,11 +186,34 @@ function saveStats() {
 
 let stats = loadStats();
 
+// Accuracy history (persisted): one char per counted decision, '1' correct / '0' wrong, for the header graph.
+// s[i] is decision number off + i + 1. Cleared with "Reset stats".
+const ACC_HISTORY_KEY = 'bjtrainer.acchistory.v1';
+const ACC_HISTORY_MAX = 5000;
+function loadAccHistory() {
+  try {
+    const h = JSON.parse(localStorage.getItem(ACC_HISTORY_KEY));
+    if (h && typeof h.s === 'string') return { off: h.off | 0, s: h.s };
+  } catch (e) { /* ignore */ }
+  return { off: 0, s: '' };
+}
+let accHistory = loadAccHistory();
+function saveAccHistory() {
+  try { localStorage.setItem(ACC_HISTORY_KEY, JSON.stringify(accHistory)); } catch (e) { /* ignore */ }
+}
+function recordAccuracy(correct) {
+  accHistory.s += correct ? '1' : '0';
+  const extra = accHistory.s.length - ACC_HISTORY_MAX;
+  if (extra > 0) { accHistory.s = accHistory.s.slice(extra); accHistory.off += extra; }
+  saveAccHistory();
+}
+
 // ---------------------------------------------------------------------------
-// Bank (persisted separately so resetting stats keeps your money)
+// Bank (persisted separately from stats; "Reset stats" resets both)
 // ---------------------------------------------------------------------------
 const BANK_KEY = 'bjtrainer.bank.v1';
 const STARTING_BANK = 1000;
+const TOP_UP = 1000; // "Add $1000" in Options
 function loadBank() {
   try {
     const b = JSON.parse(localStorage.getItem(BANK_KEY));
@@ -202,6 +225,37 @@ function saveBank() {
   try { localStorage.setItem(BANK_KEY, JSON.stringify(wallet)); } catch (e) { /* ignore */ }
 }
 const wallet = loadBank();
+
+// ---------------------------------------------------------------------------
+// Bank history (persisted): the bank after every settled hand, for the header graph.
+// pts[i] is point number off + i; deposits lists the point numbers that are "Add $1000" top-ups rather than hands
+// (older saves called these `resets`, from when the button reset the bank to $1000).
+// ---------------------------------------------------------------------------
+const HISTORY_KEY = 'bjtrainer.history.v1';
+const HISTORY_MAX = 5000;
+function loadHistory() {
+  try {
+    const h = JSON.parse(localStorage.getItem(HISTORY_KEY));
+    if (h && Array.isArray(h.pts) && h.pts.length)
+      return { off: h.off | 0, pts: h.pts, deposits: [h.deposits, h.resets].find(Array.isArray) || [] };
+  } catch (e) { /* ignore */ }
+  return { off: 0, pts: [wallet.bank], deposits: [] };
+}
+let bankHistory = loadHistory();
+function recordBank(deposit = false) {
+  bankHistory.pts.push(wallet.bank);
+  if (deposit) bankHistory.deposits.push(bankHistory.off + bankHistory.pts.length - 1);
+  const extra = bankHistory.pts.length - HISTORY_MAX;
+  if (extra > 0) {
+    bankHistory.pts.splice(0, extra);
+    bankHistory.off += extra;
+    bankHistory.deposits = bankHistory.deposits.filter(i => i >= bankHistory.off);
+  }
+  saveHistory();
+}
+function saveHistory() {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(bankHistory)); } catch (e) { /* ignore */ }
+}
 
 function money(n) {
   const sign = n < 0 ? '-' : '';
@@ -222,13 +276,16 @@ function addChip(amount) {
 // ---------------------------------------------------------------------------
 const OPTS_KEY = 'bjtrainer.opts.v1';
 // practice: 'hard' deals normally; 'soft' / 'pair' bias the player's first two cards toward that hand type.
-const opts = { surrender: true, h17: true, animate: true, showTotals: true, practice: 'hard' };
+const opts = { surrender: true, h17: true, animate: true, showTotals: true, practice: 'hard', bankWindow: 100, accWindow: 100 };
+const GRAPH_WINDOWS = [25, 50, 100, 500, 0]; // hands / decisions shown in the header graphs; 0 = all
 const PRACTICE_BIAS = 0.75; // chance a biased deal is forced; the rest stay random so the hand type isn't a given
 const PAIR_EASY_WEIGHT = 0.4; // relative odds of a forced 10-10 or A-A vs. each of 2-2 … 9-9
 try {
   const o = JSON.parse(localStorage.getItem(OPTS_KEY));
   if (o) for (const k in opts) if (typeof o[k] === typeof opts[k]) opts[k] = o[k];
   if (!['hard', 'soft', 'pair'].includes(opts.practice)) opts.practice = 'hard';
+  if (!GRAPH_WINDOWS.includes(opts.bankWindow)) opts.bankWindow = 100;
+  if (!GRAPH_WINDOWS.includes(opts.accWindow)) opts.accWindow = 100;
 } catch (e) { /* ignore */ }
 function saveOpts() {
   try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch (e) { /* ignore */ }
@@ -314,7 +371,7 @@ function deal() {
   if (wallet.bet > wallet.bank) wallet.bet = wallet.bank;
   if (wallet.bet <= 0) {
     setFeedback('neutral', wallet.bank > 0 ? 'Place a bet first.' : 'You are out of money.',
-      wallet.bank > 0 ? 'Click the chips to build your bet.' : 'Use "Reset bank" in Options to rebuy.');
+      wallet.bank > 0 ? 'Click the chips to build your bet.' : `Use "Add ${money(TOP_UP)}" in Options to rebuy.`);
     render();
     return;
   }
@@ -470,6 +527,7 @@ function finishRound(soundDelay = 0.3) {
   Sound.play(blackjack ? 'blackjack' : { won: 'win', lost: 'lose', push: 'push' }[state.outcome], soundDelay);
   saveStats();
   saveBank();
+  recordBank();
   render();
 }
 
@@ -535,6 +593,7 @@ function recordDecision(hand, ctx, action) {
   }
   state.lastCell = cellKey;
   saveStats();
+  recordAccuracy(correct);
 }
 
 // ---------------------------------------------------------------------------
@@ -638,12 +697,15 @@ function render() {
   });
   $('bet-clear').disabled = inRound;
   $('bet-max').disabled = inRound;
+  $('add-bank').disabled = inRound;
+  $('reset').disabled = inRound;
   $('bet-amount').textContent = money(inRound ? state.hands.reduce((sum, h) => sum + h.bet, 0) : wallet.bet);
   $('st-bank').textContent = money(wallet.bank);
 
   renderStats();
   renderChart();
   renderCorrection();
+  renderGraphPop();
 }
 
 const PRACTICE_TIPS = {
@@ -740,13 +802,271 @@ function renderCorrection() {
 }
 
 // ---------------------------------------------------------------------------
+// Header graphs: hovering the Bank stat shows bank over hands, the Accuracy stat shows accuracy over
+// decisions. Both share one popover (#graph-pop) and the lineGraph() renderer.
+// ---------------------------------------------------------------------------
+const GRAPH = { w: 420, h: 170, l: 46, r: 6, t: 8, b: 8 };
+const ACC_ROLL = 20; // the accuracy line is a rolling average over this many decisions
+
+function shortMoney(v) {
+  const a = Math.abs(v);
+  if (a >= 10000) return (v < 0 ? '-$' : '$') + (a / 1000).toFixed(a >= 100000 ? 0 : 1).replace(/\.0$/, '') + 'k';
+  return money(Math.round(v));
+}
+
+function trend(d) { return d > 0 ? 'up' : d < 0 ? 'down' : 'flat'; }
+const TREND_ICON = { up: '▲', down: '▼', flat: '■' };
+
+function rangeButtons(current) {
+  return '<div class="bp-ranges">' + GRAPH_WINDOWS.map(n =>
+    `<button data-window="${n}" aria-pressed="${current === n}">${n || 'All'}</button>`).join('') + '</div>';
+}
+
+// Draws pts into the popover's .bp-plot with a hover crosshair. cfg: { lo, hi, fmt (axis label),
+// color, baseline (value or null), breaks (indexes reached by a step that isn't play, e.g. a top-up: drawn
+// as a dotted gold connector instead of the line), ticks (indexes → red ticks along the bottom),
+// tip(i) → tooltip html, label }.
+function lineGraph(plot, pts, cfg) {
+  const { w, h, l, r, t, b } = GRAPH;
+  const { lo, hi } = cfg;
+  const x = i => l + (i / (pts.length - 1)) * (w - l - r);
+  const y = v => t + (1 - (v - lo) / (hi - lo)) * (h - t - b);
+  const breaks = cfg.breaks || [];
+  const pt = i => `${x(i).toFixed(1)},${y(pts[i]).toFixed(1)}`;
+  const line = pts.map((v, i) => `${i && !breaks.includes(i) ? 'L' : 'M'}${pt(i)}`).join('');
+  const area = `${pts.map((v, i) => `${i ? 'L' : 'M'}${pt(i)}`).join('')}L${x(pts.length - 1).toFixed(1)},${h - b}L${l},${h - b}Z`;
+  // Round gridline values: the largest 1/2/2.5/5 × 10^n step that still puts at least 3 lines in range.
+  // Whole numbers only, since both graphs label whole dollars / percents.
+  const lines = st => Math.floor(hi / st + 1e-9) - Math.ceil(lo / st - 1e-9) + 1;
+  const mag = 10 ** Math.floor(Math.log10(hi - lo));
+  const step = [10, 5, 2.5, 2, 1, 0.5, 0.25, 0.2, 0.1].map(m => m * mag)
+    .find(st => Number.isInteger(st) && (lines(st) >= 3 || st === 1)) || 1;
+  let grid = '';
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) {
+    grid += `<line x1="${l}" x2="${w - r}" y1="${y(v)}" y2="${y(v)}" stroke="#1f3328"/>` +
+      `<text x="${l - 6}" y="${y(v) + 3}" text-anchor="end">${cfg.fmt(v)}</text>`;
+  }
+  const base = cfg.baseline == null ? ''
+    : `<line x1="${l}" x2="${w - r}" y1="${y(cfg.baseline)}" y2="${y(cfg.baseline)}" stroke="var(--muted)" stroke-dasharray="3 3" opacity=".7"/>`;
+  const markers = breaks.map(i =>
+    `<line x1="${x(i - 1)}" x2="${x(i)}" y1="${y(pts[i - 1])}" y2="${y(pts[i])}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="2 3"/>` +
+    `<circle cx="${x(i)}" cy="${y(pts[i])}" r="2.5" fill="var(--accent)"/>`).join('');
+  const ticks = (cfg.ticks || []).map(i =>
+    `<line x1="${x(i)}" x2="${x(i)}" y1="${h - b - 6}" y2="${h - b}" stroke="var(--bad)" stroke-width="1.5"/>`).join('');
+  const last = pts.length - 1;
+
+  plot.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" aria-label="${cfg.label}">
+      <defs><linearGradient id="bp-fill" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="${cfg.color}" stop-opacity=".35"/><stop offset="1" stop-color="${cfg.color}" stop-opacity="0"/>
+      </linearGradient></defs>
+      ${grid}${base}
+      <path d="${area}" fill="url(#bp-fill)"/>
+      ${ticks}
+      <path d="${line}" fill="none" stroke="${cfg.color}" stroke-width="1.75" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+      ${markers}
+      <circle cx="${x(last)}" cy="${y(pts[last])}" r="3" fill="${cfg.color}"/>
+      <g class="bp-cursor" visibility="hidden">
+        <line y1="${t}" y2="${h - b}" stroke="var(--text)" opacity=".4"/>
+        <circle r="4" fill="var(--text)" stroke="#0b1510" stroke-width="2"/>
+      </g>
+      <rect x="${l}" y="0" width="${w - l - r}" height="${h}" fill="transparent"/>
+    </svg>
+    <div class="bp-tip" hidden></div>`;
+
+  // Crosshair + tooltip following the pointer.
+  const svg = plot.querySelector('svg'), cursor = svg.querySelector('.bp-cursor'), tip = plot.querySelector('.bp-tip');
+  const [cLine, cDot] = cursor.children;
+  const move = e => {
+    const box = svg.getBoundingClientRect();
+    const sx = ((e.clientX - box.left) / box.width) * w;
+    const i = Math.max(0, Math.min(last, Math.round(((sx - l) / (w - l - r)) * last)));
+    const cx = x(i), cy = y(pts[i]);
+    cursor.setAttribute('visibility', 'visible');
+    cLine.setAttribute('x1', cx); cLine.setAttribute('x2', cx);
+    cDot.setAttribute('cx', cx); cDot.setAttribute('cy', cy);
+    tip.innerHTML = cfg.tip(i);
+    tip.hidden = false;
+    const px = (cx / w) * box.width, half = tip.offsetWidth / 2;
+    tip.style.left = Math.max(half, Math.min(box.width - half, px)) + 'px';
+    tip.style.top = Math.max(0, (cy / h) * box.height - 34) + 'px';
+  };
+  svg.addEventListener('pointermove', move);
+  svg.addEventListener('pointerdown', move);
+  svg.addEventListener('pointerleave', () => { cursor.setAttribute('visibility', 'hidden'); tip.hidden = true; });
+}
+
+function popHead(label, value, chg, span) {
+  const dir = trend(chg.n);
+  return `<div class="bp-head"><span class="bp-label">${label}</span><span class="bp-value">${value}</span>` +
+    `<span class="bp-chg bp-${dir}">${TREND_ICON[dir]} ${chg.text}</span><span class="bp-span">${span}</span></div>`;
+}
+
+function renderBankGraph(pop) {
+  const n = opts.bankWindow;
+  const all = bankHistory.pts;
+  const start = n && all.length > n + 1 ? all.length - (n + 1) : 0; // +1: the bank before the first hand
+  const pts = all.slice(start), first = bankHistory.off + start;
+  const isDeposit = k => bankHistory.deposits.includes(k);
+  const deposits = bankHistory.deposits.filter(k => k > first).map(k => k - first);
+  const hands = pts.length - 1 - deposits.length;
+  // Change from play only: adding money isn't a win.
+  let chg = 0;
+  for (let i = 1; i < pts.length; i++) if (!isDeposit(first + i)) chg += pts[i] - pts[i - 1];
+  const pctChg = pts[0] ? ` (${chg >= 0 ? '+' : ''}${((chg / pts[0]) * 100).toFixed(1)}%)` : '';
+  const span = start ? `last ${hands} hands` : `all ${hands} hand${hands === 1 ? '' : 's'}`;
+  pop.innerHTML = popHead('Bank', money(wallet.bank), { n: chg, text: `${chg > 0 ? '+' : ''}${money(chg)}${pctChg}` }, span) +
+    (pts.length < 2 ? '<div class="bp-empty">Play a hand to start the graph.</div>' : '<div class="bp-plot"></div>') +
+    rangeButtons(n);
+  if (pts.length < 2) return;
+
+  let lo = Math.min(...pts), hi = Math.max(...pts);
+  const padY = Math.max((hi - lo) * 0.08, hi === lo ? Math.max(Math.abs(hi) * 0.05, 5) : 0);
+  lo -= padY; hi += padY;
+  lineGraph(pop.querySelector('.bp-plot'), pts, {
+    lo, hi, fmt: shortMoney, color: `var(--${{ up: 'good', down: 'bad', flat: 'muted' }[trend(chg)]})`,
+    baseline: pts[0], label: `Bank balance over ${span}`,
+    breaks: deposits,
+    tip: i => {
+      const k = first + i;
+      const handNo = k - bankHistory.deposits.filter(j => j <= k).length;
+      const d = i ? pts[i] - pts[i - 1] : 0;
+      // Old saves' "Reset bank" points can be a drop rather than a top-up.
+      const label = isDeposit(k) ? (d >= 0 ? `Added ${money(d)}` : 'Bank reset') : handNo ? `Hand ${handNo}` : 'Start';
+      const delta = i && !isDeposit(k) ? ` <span class="bp-${trend(d)}">${d > 0 ? '+' : ''}${money(d)}</span>` : '';
+      return `${label} · <b>${money(pts[i])}</b>${delta}`;
+    },
+  });
+}
+
+function renderAccGraph(pop) {
+  const n = opts.accWindow;
+  const all = accHistory.s;
+  const start = n && all.length > n ? all.length - n : 0;
+  const seq = all.slice(start), first = accHistory.off + start;
+  const right = [...seq].filter(c => c === '1').length;
+  const allTime = stats.decisions ? (stats.correct / stats.decisions) * 100 : 0;
+  const winAcc = seq.length ? (right / seq.length) * 100 : 0;
+  const diff = Math.round(winAcc) - Math.round(allTime);
+  const span = start ? `last ${seq.length} decisions` : `all ${seq.length} decision${seq.length === 1 ? '' : 's'}`;
+  pop.innerHTML = popHead('Accuracy', seq.length ? Math.round(winAcc) + '%' : '–',
+      { n: diff, text: `${diff > 0 ? '+' : ''}${diff} pts vs ${pct(stats.correct, stats.decisions)} all-time` }, span) +
+    (seq.length < 2 ? '<div class="bp-empty">Make a few decisions to start the graph.</div>' : '<div class="bp-plot"></div>') +
+    rangeButtons(n);
+  if (seq.length < 2) return;
+
+  // Rolling accuracy, using decisions from before the window too so its left edge isn't noisy.
+  const pts = [], prefix = [0];
+  for (let k = 0; k < all.length; k++) prefix.push(prefix[k] + (all[k] === '1'));
+  for (let i = 0; i < seq.length; i++) {
+    const end = start + i + 1, from = Math.max(0, end - ACC_ROLL);
+    pts.push(((prefix[end] - prefix[from]) / (end - from)) * 100);
+  }
+  const lo = Math.max(0, Math.min(...pts) - 5), hi = Math.min(100, Math.max(...pts) + 5);
+  const misses = [];
+  for (let i = 0; i < seq.length; i++) if (seq[i] === '0') misses.push(i);
+  lineGraph(pop.querySelector('.bp-plot'), pts, {
+    lo: hi - lo < 10 ? Math.max(0, hi - 10) : lo, hi: hi - lo < 10 ? Math.max(hi, 10) : hi,
+    fmt: v => Math.round(v) + '%',
+    color: `var(--${{ up: 'good', down: 'bad', flat: 'good' }[trend(diff)]})`,
+    baseline: stats.decisions ? allTime : null, ticks: misses,
+    label: `Rolling accuracy over ${span}`,
+    tip: i => {
+      const ok = seq[i] === '1';
+      const end = start + i + 1, cnt = Math.min(ACC_ROLL, end);
+      return `Decision ${first + i + 1} · <span class="bp-${ok ? 'up' : 'down'}">${ok ? '✓' : '✗'}</span> · ` +
+        `<b>${Math.round(pts[i])}%</b> <span class="bp-flat">last ${cnt}</span>`;
+    },
+  });
+}
+
+const GRAPHS = {
+  bank: { render: renderBankGraph, opt: 'bankWindow' },
+  acc: { render: renderAccGraph, opt: 'accWindow' },
+};
+let graphKind = null; // which graph #graph-pop is showing
+
+function renderGraphPop() {
+  if (graphKind) GRAPHS[graphKind].render($('graph-pop'));
+}
+
+// Show on hover (mouse) or focus; tap toggles on touch screens.
+(() => {
+  const pop = $('graph-pop');
+  const anchors = [...document.querySelectorAll('[data-graph]')];
+  let hideTimer = null, anchor = null, lastPointer = 'mouse';
+  const place = () => {
+    const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth;
+    const left = Math.max(16, Math.min(r.left + r.width / 2 - pw / 2, document.documentElement.clientWidth - pw - 16));
+    pop.style.left = left + window.scrollX + 'px';
+    pop.style.top = r.bottom + 8 + window.scrollY + 'px';
+  };
+  const show = a => {
+    clearTimeout(hideTimer);
+    if (anchor) anchor.classList.remove('open');
+    anchor = a;
+    anchor.classList.add('open');
+    graphKind = a.dataset.graph;
+    pop.hidden = false;
+    renderGraphPop();
+    place();
+  };
+  const hide = () => {
+    clearTimeout(hideTimer);
+    pop.hidden = true;
+    graphKind = null;
+    if (anchor) anchor.classList.remove('open');
+    anchor = null;
+  };
+  const hideSoon = () => { clearTimeout(hideTimer); hideTimer = setTimeout(hide, 180); };
+  for (const a of anchors) {
+    a.addEventListener('pointerdown', e => { lastPointer = e.pointerType; });
+    a.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') show(a); });
+    a.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hideSoon(); });
+    a.addEventListener('focus', () => show(a));
+    a.addEventListener('blur', e => { if (!pop.contains(e.relatedTarget)) hideSoon(); });
+    a.addEventListener('click', () => {
+      if (lastPointer === 'mouse') return;
+      if (anchor === a && !pop.hidden) hide(); else show(a);
+    });
+  }
+  pop.addEventListener('pointerenter', () => clearTimeout(hideTimer));
+  pop.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hideSoon(); });
+  pop.addEventListener('focusout', e => { if (!pop.contains(e.relatedTarget) && !anchors.includes(e.relatedTarget)) hideSoon(); });
+  pop.addEventListener('click', e => {
+    const btn = e.target.closest('[data-window]');
+    if (!btn || !graphKind) return;
+    opts[GRAPHS[graphKind].opt] = Number(btn.dataset.window);
+    saveOpts();
+    renderGraphPop();
+    pop.querySelector(`[data-window="${btn.dataset.window}"]`).focus({ preventScroll: true });
+  });
+  // Space/Enter on a range button shouldn't also deal.
+  pop.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') e.stopPropagation(); });
+  document.addEventListener('pointerdown', e => {
+    if (!pop.hidden && !pop.contains(e.target) && !anchors.some(a => a.contains(e.target))) hide();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) hide(); });
+  window.addEventListener('resize', () => { if (!pop.hidden) place(); });
+})();
+
+// ---------------------------------------------------------------------------
 // Wiring
 // ---------------------------------------------------------------------------
 document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => act(b.dataset.act)));
 $('deal').addEventListener('click', deal);
 $('reset').addEventListener('click', () => {
-  if (!confirm('Reset all training stats?')) return;
-  stats = freshStats();
+  if (state.phase === 'player' || state.phase === 'dealer') return;
+  if (!confirm(`Reset all training stats, net won, and your bank to ${money(STARTING_BANK)}?`)) return;
+  stats = freshStats(); // also zeroes stats.won (net won)
+  accHistory = { off: 0, s: '' };
+  saveAccHistory();
+  wallet.bank = STARTING_BANK;
+  wallet.bet = Math.min(wallet.bet || 25, wallet.bank);
+  saveBank();
+  bankHistory = { off: 0, pts: [wallet.bank], deposits: [] };
+  saveHistory();
+  setFeedback('neutral', `Stats reset. Bank is back to ${money(STARTING_BANK)}.`, 'Place a bet and deal.');
   state.lastCell = null;
   state.correction = null;
   saveStats();
@@ -765,13 +1085,14 @@ function showVolume() {
 showVolume();
 $('opt-volume').addEventListener('input', e => { Sound.volume = e.target.value / 100; showVolume(); });
 $('opt-volume').addEventListener('change', () => Sound.play('chip')); // preview once released
-$('reset-bank').addEventListener('click', () => {
+$('add-bank').addEventListener('click', () => {
   if (state.phase === 'player' || state.phase === 'dealer') return;
-  if (!confirm(`Reset your bank to ${money(STARTING_BANK)}?`)) return;
-  wallet.bank = STARTING_BANK;
+  wallet.bank += TOP_UP;
   wallet.bet = Math.min(wallet.bet || 25, wallet.bank);
+  Sound.play('chip');
   saveBank();
-  setFeedback('neutral', `Bank reset to ${money(STARTING_BANK)}.`, 'Place a bet and deal.');
+  recordBank(true);
+  setFeedback('neutral', `Added ${money(TOP_UP)} to your bank.`, 'Place a bet and deal.');
   render();
 });
 $('chart-panel').addEventListener('toggle', () => {

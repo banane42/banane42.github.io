@@ -34,6 +34,39 @@
   .stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
   .stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
 
+  .stat-group { display: flex; gap: 12px 24px; } /* stats sharing one hover graph */
+  .graph-anchor { cursor: pointer; border-radius: 8px; padding: 2px 6px; }
+  .graph-anchor:hover, .graph-anchor.open { background: #1c3127; }
+  .graph-anchor:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .graph-pop {
+    position: absolute; z-index: 20; width: min(440px, calc(100vw - 32px));
+    background: #0b1510; border: 1px solid #335043; border-radius: 12px; padding: 12px 14px 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.55);
+  }
+  .graph-pop[hidden] { display: none; }
+  .bp-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .bp-head .bp-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; width: 100%; }
+  .bp-head .bp-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bp-head .bp-chg { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .bp-head .bp-span { font-size: 12px; color: var(--muted); }
+  .bp-up { color: var(--good); } .bp-down { color: var(--bad); } .bp-flat { color: var(--muted); }
+  .bp-plot { position: relative; margin: 8px 0 6px; }
+  .bp-plot svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: none; }
+  .bp-plot svg text { fill: var(--muted); font: 10px system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .bp-tip {
+    position: absolute; top: 0; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+    background: #1c3127; border: 1px solid #335043; border-radius: 6px; padding: 3px 8px; font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .bp-tip[hidden] { display: none; }
+  .bp-empty { padding: 36px 8px; text-align: center; color: var(--muted); font-size: 13px; }
+  .bp-ranges { display: flex; gap: 4px; }
+  .bp-ranges button {
+    flex: 1; min-width: 0; padding: 4px 0; font-size: 12px; border-radius: 6px;
+    background: transparent; color: var(--muted); border: 1px solid #335043;
+  }
+  .bp-ranges button:hover { color: var(--text); }
+  .bp-ranges button[aria-pressed="true"] { background: #1c3127; color: var(--accent); border-color: var(--accent); }
   .layout {
     display: grid; grid-template-columns: 340px minmax(0, 1fr) 300px; gap: 16px;
     padding: 16px; max-width: 1640px; margin: 0 auto; align-items: start;
@@ -211,6 +244,9 @@
 
   .credits { text-align: center; font-size: 12px; color: var(--muted); padding: 0 16px 20px; }
   .credits a { color: inherit; }
+  .credits .aix-line { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+  .credits .aix { display: flex; }
+  .credits .aix img { height: 20px; width: 20px; opacity: .8; }
   .chart-wrap { padding: 0 16px 24px; max-width: 1400px; margin: 0 auto; }
   details.panel summary { cursor: pointer; font-weight: 600; }
   .chart-peek { margin-top: 10px; padding: 6px 10px; font-size: 13px; border-radius: 6px; background: rgba(250,204,21,.15); border: 1px solid rgba(250,204,21,.5); }
@@ -239,14 +275,17 @@
 <body>
 <header>
   <h1>♠ Blackjack Strategy Trainer</h1>
-  <div class="stat"><b id="st-acc">–</b><span>Accuracy</span></div>
+  <div class="stat graph-anchor" data-graph="acc" tabindex="0" aria-describedby="graph-pop"><b id="st-acc">–</b><span>Accuracy</span></div>
   <div class="stat"><b id="st-dec">0</b><span>Decisions</span></div>
   <div class="stat"><b id="st-streak">0</b><span>Streak</span></div>
   <div class="stat"><b id="st-best">0</b><span>Best</span></div>
   <div class="stat"><b id="st-hands">0</b><span>Hands</span></div>
-  <div class="stat"><b id="st-net">$0</b><span>Net won</span></div>
-  <div class="stat bank"><b id="st-bank">$1000</b><span>Bank</span></div>
+  <div class="stat-group graph-anchor" data-graph="bank" tabindex="0" aria-describedby="graph-pop">
+    <div class="stat"><b id="st-net">$0</b><span>Net won</span></div>
+    <div class="stat bank"><b id="st-bank">$1000</b><span>Bank</span></div>
+  </div>
 </header>
+<div class="graph-pop" id="graph-pop" role="tooltip" hidden></div>
 
 <div class="layout">
   <section class="panel correction idle" id="correction">
@@ -318,7 +357,7 @@
         <span id="volume-pct">100%</span></label>
       <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
         <button class="ghost" id="reset">Reset stats</button>
-        <button class="ghost" id="reset-bank">Reset bank to $1000</button>
+        <button class="ghost" id="add-bank">Add $1000 to bank</button>
       </div>
     </section>
   </aside>
@@ -345,6 +384,10 @@
 <footer class="credits">
   Card art by John Riggles, a.k.a. "sudo_whoami", licensed
   <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.
+  <div class="aix-line">
+    <a class="aix" href="https://0rwx.com/" target="_blank" rel="noopener"><img src="AI-X-dark.svg" alt="AI:X"></a>
+    <span>This is an <a href="https://0rwx.com/" target="_blank" rel="noopener">AI:X</a> project.</span>
+  </div>
 </footer>
 
 <script src="sound.js"></script>
